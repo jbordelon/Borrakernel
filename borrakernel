@@ -1,0 +1,50 @@
+#!/bin/bash
+
+echo ===========================================================================
+echo "                   Script para borrar kernels viejos"
+echo ===========================================================================
+echo -n "GNU/Linux versión "
+lsb_release -d -s
+echo
+echo -n "Kernel Actual NO BORRARLO:   "
+uname -r
+echo
+echo Kernels Viejos. Dejar al menos uno sin borrar:
+# dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep -Fv $(uname -r)
+dpkg -l | grep -oP '.{0,5}linux-image-[0-9]+.{0,70}'. | grep -Fv $(uname -r)
+
+if [[ -z "$1" ]]; then
+echo
+
+else
+echo
+echo ===== !!! CUIDADO Va a borrar el kernel $1 !!! =====
+echo
+read -p "ENTER o Ctr-C para cancelar"
+
+echo ====================
+echo Borrando image-extra $1...
+sudo dpkg --purge linux-image-extra-$1-generic
+
+echo ====================
+echo Borrando imagen... $1
+sudo dpkg --purge linux-image-$1-generic
+
+echo ====================
+echo Borrando Header generic $1...
+sudo dpkg --purge linux-headers-$1-generic
+
+echo ====================
+echo Borrando Header... $1
+sudo dpkg --purge linux-headers-$1
+
+echo
+# dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep -Fv $(uname -r)
+dpkg -l | grep -oP '.{0,5}linux-image-[0-9]+.{0,70}'. | grep -Fv $(uname -r)
+fi
+echo ===== Kernels Instalados: =====
+# dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+'
+dpkg -l | grep -oP '.{0,5}linux-image-[0-9]+.{0,70}'.
+echo
+df -H|sed -n '1p;4p'
+echo
