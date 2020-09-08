@@ -1,0 +1,50 @@
+#!/bin/bash
+
+echo ======================================================================
+echo "                Script para borrar kernels viejos"
+echo ======================================================================
+echo -n "GNU/Linux versión "
+lsb_release -d -s
+echo
+echo -n "Kernel Actual NO BORRARLO:   "
+uname -r
+echo
+echo Kernels Viejos. Dejar al menos uno sin borrar:
+dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep -Fv $(uname -r)
+
+if [[ -z "$1" ]]; then
+echo
+
+else
+echo
+echo ===== !!! CUIDADO Va a borrar el kernel $1 !!! =====
+echo
+read -p "ENTER o Ctr-C para cancelar"
+
+echo ====================
+echo Borrando Headers... $1
+sudo dpkg --purge linux-headers-$1-raspi2
+
+echo ====================
+echo Borrando imagen... $1
+sudo dpkg --purge linux-image-$1-raspi2
+
+echo ====================
+echo Borrando modulos $1...
+sudo dpkg --purge linux-modules-$1-raspi2
+
+echo ====================
+echo Borrando Header... $1
+sudo dpkg --purge linux-raspi2-headers-$1
+
+echo
+dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+' | grep -Fv $(uname -r)
+fi
+echo ===== Kernels Instalados: =====
+dpkg -l | tail -n +6 | grep -E 'linux-image-[0-9]+'
+
+echo
+# Muestra el espacio disponible en disco (linea 1 y 4)
+df -H|sed -n '1p;4p'
+
+echo
